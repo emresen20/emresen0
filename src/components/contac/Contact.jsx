@@ -1,4 +1,3 @@
-
 import "./contact.css";
 import github from "../../images/github.png";
 import email from "../../images/email.png";
@@ -6,16 +5,35 @@ import linkedin from "../../images/linkedin.png";
 import { useRef, useState, useContext } from "react";
 import emailjs from '@emailjs/browser';
 import { ThemeContext } from "../../context";
+
+// E-posta doğrulama işlevi
+const validateEmail = (email) => {
+    const re = /\S+@\S+\.\S+/;
+    return re.test(email);
+};
+
 const Contact = () => {
     const formRef = useRef();
     const [done, setDone] = useState(false);
+    const [error, setError] = useState('');
     const theme = useContext(ThemeContext);
     const darkMode = theme.state.darkMode;
     const githubLink = "https://github.com/emresen20";
     const linkedinLink = "https://www.linkedin.com/in/mresen/";
 
+    // Güncellenmiş handleSubmit fonksiyonu
     const handleSubmit = (e) => {
         e.preventDefault();
+        const formData = new FormData(formRef.current);
+        const userEmail = formData.get('user_Email');
+
+        // E-posta doğrulaması yap
+        if (!validateEmail(userEmail)) {
+            setError("Please enter a valid e-mail address.");
+            return; // Eğer e-posta geçerli değilse göndermeyi durdur
+        }
+
+        // Eğer e-posta geçerli ise formu gönder
         emailjs.sendForm('service_7u4lhmo', 'template_7iqv7tl', formRef.current, '9UnHVHe9nkclGiBEc')
             .then((result) => {
                 console.log(result.text);
@@ -23,9 +41,8 @@ const Contact = () => {
             }, (error) => {
                 console.log(error.text);
             });
-
-
     }
+
     return (
         <div className="c">
             <div className="c-bg"></div>
@@ -47,7 +64,6 @@ const Contact = () => {
                             <img
                                 src={email}
                                 className="c-icon"
-
                             />
                             emreium@gmail.com
                         </div>
@@ -73,6 +89,7 @@ const Contact = () => {
                         <input style={{ backgroundColor: darkMode && "#333" }} type="text" placeholder="Email" name="user_Email" />
                         <textarea style={{ backgroundColor: darkMode && "#333" }} rows="5" placeholder="Message" name="message" />
                         <button>Submit</button>
+                        {error && <p style={{ color: 'red' }}>{error}</p>}
                         {done && "Thanks for your conctact "}
                     </form>
                 </div>
@@ -80,4 +97,5 @@ const Contact = () => {
         </div>
     )
 }
+
 export default Contact;
